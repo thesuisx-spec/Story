@@ -36,7 +36,7 @@ plain white background. Change only the expression: …».
 
 | Персонаж | База | Эмоции |
 |---|---|---|
-| Сакура | ✅ уже есть (Canva) | улыбка ✅, смех ✅, удивление ✅, смущение ✅, задумчивость ✅ |
+| Сакура | ✅ Grok, `src/sakura-grok/` | smile · happy · surprised · embarrassed · sad |
 | `chars/hiroshi` | Japanese father in his late 40s, short black hair with a little grey, rectangular glasses, kind tired face, grey business suit with a loosened blue tie, car keys in hand. | спокойный · улыбка · смущённый смех · серьёзный |
 | `chars/yumiko` | Japanese mother in her mid 40s, shoulder-length dark brown hair tied back loosely, gentle eyes, soft orange cardigan over a cream blouse, white apron. | улыбка · радостное удивление · смех |
 | `chars/kenta` | Japanese boy, 12 years old, messy spiky black hair, mischievous grin, green dinosaur-print pajamas. | хитрая улыбка · восторг («медведи!») · подозрительный прищур |
@@ -57,3 +57,8 @@ plain white background. Change only the expression: …».
 | `src/girl-cardigan.jpg` | Gemini | будущая **молодая Вера, 1976** — для сцен-воспоминаний (акты 4–5, эпилог); ключ на шее — от жестяной коробки |
 | `bg/airport-gemini.jpg` | Gemini | запасной: зал вылета днём, табло с ошибками в тексте |
 | Сакура × 6 | Canva | лежат в Canva, нужно скачать и загрузить сюда |
+
+## Вырезание фона
+`python3 tools/cutout.py src.jpg out.png [--box x0 y0 x1 y1]` — нейросеть rembg (модель isnet-anime),
+чисто обрабатывает пряди волос. Для листов с несколькими позами — `--box` на каждую.
+Генераторы, которые хорошо справились: Gemini (фоны, взрослые персонажи), Grok (Сакура).
