@@ -47,5 +47,9 @@ plain white background. Change only the expression: …».
 
 | Файл | Откуда | Заметки |
 |---|---|---|
-| `bg/airport-gemini.jpg` | Gemini | красиво, но это зал **вылета** днём, табло с ошибками в тексте (MUOYA, 成田空港), много людей — для сцены лучше перегенерировать по промпту выше |
-| Сакура × 6, аэропорт (закат) | Canva | лежат в Canva, нужно скачать и загрузить сюда |
+| `bg/menu.jpg`, `grandma-room.jpg`, `plane.jpg`, `airport.jpg`, `car-night.jpg`, `genkan.jpg`, `room-night.jpg` | Gemini | ✅ все фоны эпизода 1 |
+| `chars/hiroshi/calm.png`, `smile.png` | Gemini, вырезаны `tools/cutout.py` из `src/hiroshi-sheet.jpg` | ✅ |
+| Хироси: смущённый смех, серьёзный | Gemini | ✗ на листе русские подписи поверх фигуры и обрубленная рука — перегенерировать по одному на картинку |
+| `src/girl-cardigan.jpg` | Gemini | ? чей это персонаж — уточнить |
+| `bg/airport-gemini.jpg` | Gemini | запасной: зал вылета днём, табло с ошибками в тексте |
+| Сакура × 6 | Canva | лежат в Canva, нужно скачать и загрузить сюда |
