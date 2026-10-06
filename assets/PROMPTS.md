@@ -39,7 +39,7 @@ plain white background. Change only the expression: …».
 | Сакура | ✅ уже есть (Canva) | улыбка ✅, смех ✅, удивление ✅, смущение ✅, задумчивость ✅ |
 | `chars/hiroshi` | Japanese father in his late 40s, short black hair with a little grey, rectangular glasses, kind tired face, grey business suit with a loosened blue tie, car keys in hand. | спокойный · улыбка · смущённый смех · серьёзный |
 | `chars/yumiko` | Japanese mother in her mid 40s, shoulder-length dark brown hair tied back loosely, gentle eyes, soft orange cardigan over a cream blouse, white apron. | улыбка · радостное удивление · смех |
-| `chars/kenta` | Japanese boy, 8 years old, messy spiky black hair, mischievous grin, green dinosaur-print pajamas. | хитрая улыбка · восторг («медведи!») · подозрительный прищур |
+| `chars/kenta` | Japanese boy, 12 years old, messy spiky black hair, mischievous grin, green dinosaur-print pajamas. | хитрая улыбка · восторг («медведи!») · подозрительный прищур |
 | `chars/vera` | Russian grandmother, about 70, short silver hair, round glasses, warm wise smile, burgundy knitted cardigan over a cream blouse. | тёплая улыбка · грусть-воспоминание |
 | `chars/suzuki` | Japanese taxi driver, about 60, white gloves, dark uniform cap and jacket, polite face. | вежливое недоумение · смех |
 
@@ -53,7 +53,7 @@ plain white background. Change only the expression: …».
 | `chars/suzuki/` calm, smile, laugh, serious | Gemini | ✅ |
 | `chars/vera/` smile, happy, laugh, gentle | Gemini | ✅ |
 | `chars/yumiko/` calm, smile, embarrassed, sad | Gemini | ✅ подписи на листе вырезаны автоматически |
-| `chars/kenta/` smirk, grin, laugh, sulky | Gemini | ⚠ выглядит на 13–14 лет, а по сценарию 8 |
-| `src/girl-cardigan.jpg` | Gemini | ? чей это персонаж — уточнить |
+| `chars/kenta/` smirk, grin, laugh, sulky | Gemini | ✅ возраст в сценарии поменяли на 12 под эту картинку |
+| `src/girl-cardigan.jpg` | Gemini | будущая **молодая Вера, 1976** — для сцен-воспоминаний (акты 4–5, эпилог); ключ на шее — от жестяной коробки |
 | `bg/airport-gemini.jpg` | Gemini | запасной: зал вылета днём, табло с ошибками в тексте |
 | Сакура × 6 | Canva | лежат в Canva, нужно скачать и загрузить сюда |
