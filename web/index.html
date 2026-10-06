@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>鈴の約束 · Обещание колокольчика</title>
+<meta name="description" content="Визуальная новелла: история о колокольчике, дружбе и Японии — с простым японским.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700;800&family=Zen+Maru+Gothic:wght@500;700&family=Klee+One:wght@600&family=Nunito:ital,wght@0,500;0,700;0,800;1,500&display=swap">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<div id="stage" aria-live="polite">
+  <div id="game">
+    <!-- фон: два слоя для плавной смены -->
+    <div class="bg" id="bgA"></div>
+    <div class="bg" id="bgB"></div>
+    <div id="grain"></div>
+    <div id="sprites"></div>
+
+    <!-- верхние кнопки -->
+    <div id="hud" hidden>
+      <div id="sceneTag"></div>
+      <div class="hud-btns">
+        <button class="round" id="btnLog" title="История реплик" aria-label="История реплик">履歴</button>
+        <button class="round" id="btnMenu" title="Меню" aria-label="Меню">☰</button>
+      </div>
+    </div>
+
+    <!-- окно диалога -->
+    <div id="dialog" hidden>
+      <div id="nameTag" hidden></div>
+      <div id="lineJp" lang="ja"></div>
+      <div id="lineRu"></div>
+      <div class="dlg-ctrls">
+        <span id="nextMark">▼</span>
+        <button id="btnVoice" title="Озвучить ещё раз" aria-label="Озвучить ещё раз" lang="ja">音</button>
+        <button id="btnTr" title="Перевод" aria-label="Перевод" lang="ja">訳</button>
+      </div>
+    </div>
+
+    <div id="choices" hidden></div>
+    <div id="pick" hidden></div>
+    <div id="signCard" hidden></div>
+    <div id="sceneCard" hidden><div class="sc-main"></div><div class="sc-sub"></div></div>
+    <div id="toast" hidden></div>
+    <div id="wordCard" hidden></div>
+
+    <!-- титульный экран -->
+    <section id="title" class="screen">
+      <div class="petals" aria-hidden="true"></div>
+      <div class="title-block">
+        <h1 lang="ja">鈴の約束</h1>
+        <p>Обещание колокольчика</p>
+      </div>
+      <nav class="title-menu">
+        <button id="tNew"><span lang="ja">はじめから</span><small>Новая игра</small></button>
+        <button id="tCont" hidden><span lang="ja">つづきから</span><small id="tContSub">Продолжить</small></button>
+        <button id="tWords"><span lang="ja">ことば</span><small>Словарик</small></button>
+        <button id="tSettings"><span lang="ja">せってい</span><small>Настройки</small></button>
+      </nav>
+      <div class="title-foot">Эпизод 1 · はじめまして</div>
+    </section>
+
+    <!-- имя героя -->
+    <section id="nameScreen" class="screen" hidden>
+      <div class="panel name-panel">
+        <h2 lang="ja">あなたの なまえは？</h2>
+        <p class="muted">Как тебя зовут?</p>
+        <label for="nameInput">Имя</label>
+        <input id="nameInput" maxlength="16" autocomplete="off" placeholder="Например, Анна">
+        <div class="kana-row">
+          <div>
+            <div class="muted small">По-японски</div>
+            <div id="kanaPreview" lang="ja">アンナ</div>
+          </div>
+          <button class="link" id="kanaEditBtn">изменить</button>
+        </div>
+        <input id="kanaInput" lang="ja" maxlength="12" hidden>
+        <div class="seg" role="radiogroup" aria-label="Кто ты">
+          <button id="gF" class="on" role="radio" aria-checked="true">я девочка</button>
+          <button id="gM" role="radio" aria-checked="false">я мальчик</button>
+        </div>
+        <div class="row-end">
+          <button class="ghost" id="nameBack">Назад</button>
+          <button class="primary" id="nameGo">Начать</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- письмо Ханы -->
+    <section id="letter" class="overlay" hidden>
+      <div class="paper" lang="ja"></div>
+      <div class="letter-hint">Нажми, чтобы закрыть</div>
+    </section>
+
+    <!-- конец эпизода -->
+    <section id="ending" class="screen" hidden>
+      <div class="panel end-panel">
+        <div class="end-kicker" lang="ja">第1話 おわり</div>
+        <h2>Конец первого эпизода</h2>
+        <div class="friends"></div>
+        <p class="teaser"></p>
+        <div class="row-end">
+          <button class="ghost" id="endWords">Словарик</button>
+          <button class="ghost" id="endAgain">Сыграть заново</button>
+          <button class="primary" id="endMenu">В главное меню</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- общие окна -->
+    <section id="modal" class="overlay" hidden>
+      <div class="panel modal-panel">
+        <div class="modal-head"><h2 id="modalTitle"></h2><button class="round" id="modalClose" aria-label="Закрыть">×</button></div>
+        <div id="modalBody"></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+<div id="rotate" aria-hidden="true">Поверни телефон горизонтально ↻</div>
+<script src="js/words.js"></script>
+<script src="js/ep01.js"></script>
+<script src="js/engine.js"></script>
+</body>
+</html>
