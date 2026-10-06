@@ -39,6 +39,7 @@ button:focus-visible, input:focus-visible { outline: .15em solid var(--bell); ou
   mix-blend-mode: overlay;
 }
 #game.sepia #grain { opacity: .35; }
+#game.dim .bg { filter: brightness(.4) blur(.25em) saturate(.8); }
 #game.sepia #sprites img { filter: sepia(.45) saturate(.85); }
 
 /* ---------- персонажи ---------- */
@@ -67,7 +68,7 @@ button:focus-visible, input:focus-visible { outline: .15em solid var(--bell); ou
   position: absolute; left: 3%; right: 3%; bottom: 3.5%; min-height: 26%; z-index: 5; cursor: pointer;
   background: linear-gradient(180deg, rgba(26,22,58,.9), rgba(15,13,36,.95));
   border: 1px solid rgba(245,169,193,.35); border-radius: 1em; padding: 1.5em 1.6em .7em;
-  display: grid; grid-template-rows: auto 1fr auto; gap: .35em;
+  display: grid; grid-template-rows: 1fr auto; gap: .35em;
   box-shadow: 0 1em 3em rgba(0,0,0,.35);
 }
 #nameTag {
@@ -81,7 +82,8 @@ button:focus-visible, input:focus-visible { outline: .15em solid var(--bell); ou
 #lineJp.narr { font-family: var(--f-ru); font-style: italic; font-size: 1.2em; line-height: 1.5; letter-spacing: 0; color: #e2ddf3; }
 #lineJp .ch { opacity: 0; }
 #lineJp .ch.v { opacity: 1; }
-#lineJp .w { border-bottom: .08em dashed rgba(236,200,106,.55); cursor: help; border-radius: .1em; }
+#lineJp .w { border-bottom: .08em dashed transparent; border-radius: .1em; }
+#dialog.done #lineJp .w { border-bottom-color: rgba(236,200,106,.6); cursor: help; }
 #lineJp .w:hover { background: rgba(236,200,106,.15); }
 #lineRu { font-family: var(--f-ru); color: var(--muted); font-size: .95em; min-height: 1.3em; }
 #lineRu.locked { font-style: italic; opacity: .8; }
@@ -202,12 +204,12 @@ button.link { background: none; border: 0; color: var(--muted); text-decoration:
 .overlay { position: absolute; inset: 0; z-index: 30; background: rgba(8,6,20,.6); display: grid; place-items: center; }
 #letter { cursor: pointer; }
 .paper {
-  width: 46%; min-height: 78%; background: var(--paper); color: var(--paper-ink); padding: 1.6em 2em; border-radius: .3em;
+  width: 52%; min-height: 78%; background: var(--paper); color: var(--paper-ink); padding: 1.6em 2em; border-radius: .3em;
   box-shadow: 0 1.2em 3em rgba(0,0,0,.55); transform: rotate(-1deg);
   background-image: repeating-linear-gradient(180deg, transparent 0 2.35em, rgba(160,120,100,.18) 2.35em calc(2.35em + 1px));
 }
-.paper p { margin: 0; font-size: 1.35em; line-height: 1.75; font-family: "Klee One", var(--f-jp); }
-.paper .blur { filter: blur(.2em); opacity: .7; }
+.paper p { margin: 0; font-size: 1.2em; line-height: 1.75; font-family: "Klee One", var(--f-jp); }
+.paper .blur { filter: blur(.22em); opacity: .65; }
 .paper .known { background: rgba(236,200,106,.5); border-radius: .2em; padding: 0 .1em; }
 .paper .sign { text-align: right; }
 .letter-hint { position: absolute; bottom: 4%; color: var(--muted); font-size: .8em; }
