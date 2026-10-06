@@ -50,6 +50,10 @@ plain white background. Change only the expression: …».
 | `bg/menu.jpg`, `grandma-room.jpg`, `plane.jpg`, `airport.jpg`, `car-night.jpg`, `genkan.jpg`, `room-night.jpg` | Gemini | ✅ все фоны эпизода 1 |
 | `chars/hiroshi/calm.png`, `smile.png` | Gemini, вырезаны `tools/cutout.py` из `src/hiroshi-sheet.jpg` | ✅ |
 | Хироси: смущённый смех, серьёзный | Gemini | ✗ на листе русские подписи поверх фигуры и обрубленная рука — перегенерировать по одному на картинку |
+| `chars/suzuki/` calm, smile, laugh, serious | Gemini | ✅ |
+| `chars/vera/` smile, happy, laugh, gentle | Gemini | ✅ |
+| `chars/yumiko/` calm, smile, embarrassed, sad | Gemini | ✅ подписи на листе вырезаны автоматически |
+| `chars/kenta/` smirk, grin, laugh, sulky | Gemini | ⚠ выглядит на 13–14 лет, а по сценарию 8 |
 | `src/girl-cardigan.jpg` | Gemini | ? чей это персонаж — уточнить |
 | `bg/airport-gemini.jpg` | Gemini | запасной: зал вылета днём, табло с ошибками в тексте |
 | Сакура × 6 | Canva | лежат в Canva, нужно скачать и загрузить сюда |
