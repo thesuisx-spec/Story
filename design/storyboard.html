@@ -1,0 +1,791 @@
+<title>鈴の約束 · Раскадровка</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Zen+Maru+Gothic:wght@500;700&family=Klee+One:wght@600&family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: одна колонка раскадровки — у каждого кадра шапка, экран 16:9 и пометки к нему. Ночная палитра игры. */
+:root {
+  --night: #13112a;
+  --night-2: #1d1a3d;
+  --ink: #eeeaf8;
+  --muted: #a8a3c9;
+  --line: rgba(238, 234, 248, .13);
+  --sakura: #f3a9c0;
+  --bell: #e8c56c;
+  --paper: #f4ecdc;
+  --paper-ink: #3b2f2a;
+  --good: #7fdcaa;
+  --bad: #ff8a96;
+  --f-title: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --f-jp: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Noto Sans JP", sans-serif;
+  --f-ru: "PT Sans", "Segoe UI", system-ui, sans-serif;
+  --f-hand: "Klee One", "Zen Maru Gothic", serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--night); color: var(--ink); }
+body { font-family: var(--f-ru); font-size: 16px; line-height: 1.55; padding-inline: 16px; padding-block: 32px 64px; }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 56px; }
+
+header.page { display: grid; gap: 10px; max-width: 720px; }
+header.page .kicker { font-family: var(--f-jp); color: var(--bell); letter-spacing: .12em; font-size: 13px; }
+header.page h1 { font-family: var(--f-title); font-weight: 800; font-size: clamp(30px, 5vw, 48px); line-height: 1.15; margin: 0; text-wrap: balance; }
+header.page h1 small { display: block; font-family: var(--f-ru); font-weight: 400; font-size: .45em; color: var(--muted); margin-top: 6px; }
+header.page p { margin: 0; color: var(--muted); max-width: 62ch; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.toc a { color: var(--ink); text-decoration: none; font-size: 14px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; }
+.toc a:hover, .toc a:focus-visible { border-color: var(--sakura); outline: none; }
+
+section.board { display: grid; gap: 14px; scroll-margin-top: 16px; }
+.board-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.board-head .num { font-family: var(--f-title); color: var(--sakura); font-size: 15px; font-variant-numeric: tabular-nums; }
+.board-head h2 { margin: 0; font-family: var(--f-ru); font-size: 22px; font-weight: 700; }
+.board-head .jp { font-family: var(--f-jp); color: var(--muted); font-size: 15px; }
+.notes { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; color: var(--muted); max-width: 72ch; }
+.notes li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; }
+.notes li b { color: var(--ink); font-weight: 700; }
+.pin { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--bell); color: var(--night); font: 700 12px/1 var(--f-ru); }
+
+/* ---------- Экран 16:9 ---------- */
+.screen {
+  position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; overflow: hidden;
+  border-radius: 10px; border: 1px solid var(--line); container-type: inline-size;
+  font-size: 1.9cqw; font-family: var(--f-jp); color: var(--ink); background: var(--night-2);
+  box-shadow: 0 20px 50px rgba(0,0,0,.35);
+}
+.screen .layer { position: absolute; inset: 0; }
+.screen svg.bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.callout { position: absolute; z-index: 9; transform: translate(-50%, -50%); width: 2.2em; height: 2.2em; font-size: .62em; }
+.callout .pin { width: 100%; height: 100%; font-size: 1.1em; box-shadow: 0 0 0 .25em rgba(19,17,42,.5); }
+
+/* верхняя панель */
+.hud { position: absolute; top: 2.5%; left: 2.5%; right: 2.5%; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+.ep-tag { background: rgba(19,17,42,.6); border: 1px solid var(--line); border-radius: 2em; padding: .25em .9em; font-size: .78em; display: flex; gap: .6em; align-items: center; }
+.ep-tag i { font-style: normal; color: var(--sakura); }
+.hud-btns { display: flex; gap: .4em; }
+.hud-btns span { width: 2.2em; height: 2.2em; display: grid; place-items: center; border-radius: 50%; background: rgba(19,17,42,.6); border: 1px solid var(--line); font-size: .8em; }
+.hud-btns span.lit { border-color: var(--bell); color: var(--bell); }
+
+/* персонажи */
+.sprite { position: absolute; bottom: 0; height: 88%; z-index: 2; }
+.sprite svg { height: 100%; width: auto; display: block; }
+.sprite.dim { filter: brightness(.55) saturate(.7); }
+
+/* окно диалога */
+.dialog {
+  position: absolute; left: 3%; right: 3%; bottom: 4%; min-height: 27%; z-index: 4;
+  background: linear-gradient(180deg, rgba(25,22,54,.93), rgba(17,15,38,.95));
+  border: 1px solid rgba(243,169,192,.35); border-radius: .9em; padding: 1.3em 1.4em .8em;
+  display: grid; grid-template-rows: 1fr auto; gap: .5em;
+}
+.nametag { position: absolute; top: -1em; left: 1.2em; background: var(--sakura); color: #3a1626; font-weight: 700; padding: .2em .9em; border-radius: .5em; font-size: .9em; }
+.nametag.gray { background: #b9b4d8; color: #221f3f; }
+.nametag.gold { background: var(--bell); color: #3a2b0e; }
+.line-jp { font-size: 1.45em; line-height: 1.9; letter-spacing: .03em; }
+.line-jp ruby rt { font-size: .45em; color: var(--muted); letter-spacing: 0; }
+.line-jp .new { border-bottom: .12em dotted var(--bell); }
+.line-jp .known { color: var(--bell); }
+.line-ru { font-family: var(--f-ru); color: var(--muted); font-size: .95em; margin-top: .2em; }
+.line-ru.hidden { letter-spacing: .1em; }
+.narr { font-family: var(--f-ru); font-size: 1.15em; line-height: 1.5; font-style: italic; }
+.ctrls { display: flex; gap: .5em; justify-content: flex-end; align-items: center; }
+.ctrls span { font-size: .72em; border: 1px solid var(--line); border-radius: .4em; padding: .15em .55em; color: var(--muted); }
+.ctrls span.on { border-color: var(--sakura); color: var(--sakura); }
+.ctrls .next { margin-right: auto; color: var(--sakura); border: 0; font-size: .9em; animation: bob 1.2s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(.2em); } }
+
+/* выбор */
+.choices { position: absolute; left: 50%; top: 9%; transform: translateX(-50%); width: 62%; display: grid; gap: .55em; z-index: 6; }
+.choice {
+  background: rgba(19,17,42,.9); border: 1px solid rgba(243,169,192,.45); border-radius: .7em;
+  padding: .55em 1em; display: grid; grid-template-columns: 1.6em 1fr; gap: .1em .6em; align-items: center;
+}
+.choice .k { grid-row: span 2; width: 1.6em; height: 1.6em; border-radius: 50%; display: grid; place-items: center; background: rgba(243,169,192,.18); color: var(--sakura); font-size: .85em; }
+.choice .jp { font-size: 1.05em; }
+.choice .ru { font-family: var(--f-ru); font-size: .72em; color: var(--muted); }
+.choice.sel { border-color: var(--sakura); background: rgba(70,32,60,.92); box-shadow: 0 0 0 .15em rgba(243,169,192,.25); }
+.choice.wrong { border-color: var(--bad); }
+.timer-hint { font-family: var(--f-ru); font-size: .7em; color: var(--muted); text-align: center; }
+
+/* всплывашки */
+.toast { position: absolute; z-index: 7; background: var(--paper); color: var(--paper-ink); border-radius: .7em; padding: .7em 1em; box-shadow: 0 .6em 1.6em rgba(0,0,0,.4); font-family: var(--f-ru); }
+.toast .t-jp { font-family: var(--f-jp); font-size: 1.6em; font-weight: 700; color: #2b2140; }
+.toast .t-kicker { font-size: .7em; letter-spacing: .1em; color: #a2577a; text-transform: uppercase; }
+.toast .t-ru { font-size: .95em; }
+.toast .t-ex { font-family: var(--f-jp); font-size: .85em; color: #6a5a50; margin-top: .2em; }
+.heart { position: absolute; z-index: 7; font-family: var(--f-ru); font-weight: 700; color: var(--sakura); background: rgba(19,17,42,.8); border: 1px solid var(--sakura); border-radius: 2em; padding: .2em .8em; font-size: .85em; }
+.react { position: absolute; z-index: 6; font-size: 2.2em; font-weight: 700; color: var(--bad); text-shadow: 0 .1em .3em rgba(0,0,0,.5); }
+
+/* меню */
+.menu-title { position: absolute; left: 8%; top: 13%; z-index: 3; }
+.menu-title .jp { font-family: var(--f-title); font-weight: 800; font-size: 4.6em; line-height: 1; letter-spacing: .06em; text-shadow: 0 .05em .4em rgba(243,169,192,.35); }
+.menu-title .ru { font-family: var(--f-ru); color: var(--muted); font-size: 1.05em; margin-top: .6em; letter-spacing: .2em; text-transform: uppercase; }
+.menu-list { position: absolute; left: 7%; top: 46%; z-index: 3; display: grid; gap: .45em; }
+.menu-list div { display: flex; align-items: baseline; gap: .8em; font-size: 1.15em; }
+.menu-list div small { font-family: var(--f-ru); color: var(--muted); font-size: .72em; }
+.menu-list div.cur { color: var(--sakura); }
+.menu-list div.cur::before { content: ""; width: .5em; height: .5em; background: var(--sakura); transform: rotate(45deg); margin-left: -1.1em; align-self: center; }
+.menu-foot { position: absolute; left: 7%; bottom: 5%; font-family: var(--f-ru); font-size: .7em; color: var(--muted); z-index: 3; }
+
+.petal { position: absolute; top: -5%; width: .9em; height: .6em; background: var(--sakura); border-radius: 100% 0 100% 0; opacity: .8; z-index: 2; animation: fall linear infinite; }
+@keyframes fall { to { transform: translate(-6em, 60cqw) rotate(540deg); } }
+
+/* создание героя */
+.panel { position: absolute; inset: 8% 10%; z-index: 3; background: rgba(19,17,42,.88); border: 1px solid var(--line); border-radius: 1em; padding: 1.4em 1.8em; display: grid; grid-template-columns: 1fr 1fr; gap: 1.4em; }
+.panel h3 { margin: 0 0 .6em; font-family: var(--f-title); font-size: 1.5em; }
+.field { display: grid; gap: .3em; margin-bottom: .9em; }
+.field label { font-family: var(--f-ru); font-size: .75em; color: var(--muted); }
+.field .input { border: 1px solid var(--line); border-radius: .5em; padding: .45em .8em; font-family: var(--f-ru); font-size: 1em; background: rgba(255,255,255,.04); }
+.field .kana { font-size: 2.4em; letter-spacing: .1em; color: var(--sakura); }
+.seg { display: flex; gap: .4em; }
+.seg span { font-family: var(--f-ru); font-size: .8em; border: 1px solid var(--line); border-radius: .5em; padding: .3em .8em; }
+.seg span.on { border-color: var(--sakura); color: var(--sakura); }
+.btn { display: inline-block; background: var(--sakura); color: #3a1626; font-weight: 700; border-radius: .6em; padding: .45em 1.2em; font-size: .95em; }
+.kana-split { display: flex; gap: .5em; margin-top: .4em; }
+.kana-split div { text-align: center; border: 1px solid var(--line); border-radius: .5em; padding: .3em .6em; }
+.kana-split b { display: block; font-size: 1.5em; }
+.kana-split small { font-family: var(--f-ru); color: var(--muted); font-size: .7em; }
+
+/* письмо */
+.letter { position: absolute; z-index: 3; left: 26%; top: 7%; width: 48%; height: 86%; background: var(--paper); color: var(--paper-ink); border-radius: .3em; padding: 1.4em 1.6em; box-shadow: 0 1em 3em rgba(0,0,0,.5); background-image: repeating-linear-gradient(180deg, transparent 0 2.25em, rgba(160,120,100,.18) 2.25em calc(2.25em + 1px)); }
+.letter p { margin: 0; font-family: var(--f-hand); font-size: 1.1em; line-height: 1.8; }
+.letter .blur { filter: blur(.22em); opacity: .75; }
+.letter .known { background: rgba(232,197,108,.45); border-radius: .2em; padding: 0 .1em; filter: none; }
+.letter-parts { position: absolute; z-index: 3; right: 4%; top: 20%; display: grid; gap: .5em; font-family: var(--f-ru); font-size: .78em; }
+.letter-parts div { display: flex; gap: .5em; align-items: center; color: var(--muted); }
+.letter-parts div i { width: 1.2em; height: 1.2em; border-radius: 50%; border: 1px solid var(--line); display: inline-block; }
+.letter-parts div.part i { background: conic-gradient(var(--bell) 0 22%, transparent 0); border-color: var(--bell); }
+.letter-parts div.part { color: var(--ink); }
+
+/* итоги */
+.result { position: absolute; z-index: 3; inset: 7% 12%; background: rgba(19,17,42,.9); border: 1px solid var(--line); border-radius: 1em; padding: 1.3em 1.8em; display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.2em 2em; align-content: start; }
+.result h3 { grid-column: 1 / -1; margin: 0; font-family: var(--f-title); font-size: 1.7em; display: flex; justify-content: space-between; align-items: baseline; }
+.result h3 .stars { color: var(--bell); letter-spacing: .1em; font-size: .9em; }
+.result h4 { margin: 0 0 .4em; font-family: var(--f-ru); font-size: .75em; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+.wordgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .25em .9em; font-size: .85em; }
+.wordgrid span small { font-family: var(--f-ru); color: var(--muted); margin-left: .4em; }
+.friends { display: grid; gap: .45em; font-family: var(--f-ru); font-size: .85em; }
+.friends div { display: grid; grid-template-columns: 5.5em 1fr; align-items: center; }
+.friends .bar { height: .45em; background: rgba(255,255,255,.08); border-radius: 1em; overflow: hidden; }
+.friends .bar i { display: block; height: 100%; background: var(--sakura); border-radius: 1em; }
+.result .actions { grid-column: 1 / -1; display: flex; gap: .7em; justify-content: flex-end; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); font-weight: 500; }
+
+/* карта */
+.map { position: absolute; z-index: 3; inset: 15% 4% 8%; display: grid; grid-template-columns: repeat(5, 1fr); gap: .8em; }
+.act { border-radius: .8em; padding: .7em .6em; display: grid; grid-template-rows: auto auto 1fr; gap: .4em; border: 1px solid var(--line); background: rgba(19,17,42,.7); }
+.act .ah { font-family: var(--f-title); font-size: 1.6em; line-height: 1; }
+.act .as { font-family: var(--f-ru); font-size: .62em; color: var(--muted); }
+.act .eps { display: grid; gap: .3em; align-content: start; }
+.act .ep { font-size: .72em; border-radius: .4em; padding: .25em .45em; background: rgba(255,255,255,.05); display: flex; justify-content: space-between; gap: .3em; }
+.act .ep b { font-weight: 500; }
+.act .ep small { color: var(--bell); font-family: var(--f-ru); }
+.act .ep.cur { outline: 1px solid var(--sakura); color: var(--sakura); }
+.act .ep.lock { opacity: .4; }
+.act.locked { opacity: .55; }
+.act:nth-child(1) { border-color: rgba(243,169,192,.5); }
+
+/* настройки */
+.settings { position: absolute; z-index: 3; inset: 9% 18%; background: rgba(19,17,42,.92); border: 1px solid var(--line); border-radius: 1em; padding: 1.3em 1.8em; display: grid; gap: .75em; align-content: start; }
+.settings h3 { margin: 0 0 .2em; font-family: var(--f-title); font-size: 1.5em; }
+.srow { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1em; font-family: var(--f-ru); font-size: .9em; }
+.srow .lbl small { display: block; color: var(--muted); font-size: .75em; }
+.slider { width: 9em; height: .35em; background: rgba(255,255,255,.12); border-radius: 1em; position: relative; }
+.slider i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--sakura); border-radius: 1em; }
+.slider i::after { content: ""; position: absolute; right: -.45em; top: 50%; width: .9em; height: .9em; border-radius: 50%; background: var(--ink); transform: translateY(-50%); }
+
+/* легенда кнопок */
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 24px; }
+.legend div { display: grid; grid-template-columns: 3.2em 1fr; gap: 10px; align-items: baseline; }
+.legend code { font-family: var(--f-jp); color: var(--sakura); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; text-align: center; font-size: 14px; }
+.legend span { color: var(--muted); font-size: 15px; }
+h2.section { font-family: var(--f-title); font-size: 26px; margin: 0; }
+
+@media (prefers-reduced-motion: reduce) { .petal, .ctrls .next, .swing { animation: none; } }
+.swing { transform-origin: 50% 0; animation: swing 2.6s ease-in-out infinite; }
+@keyframes swing { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+</style>
+
+<!-- Персонажи: общий каркас + варианты причёсок и одежды -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="face" viewBox="0 0 200 320">
+      <rect x="86" y="170" width="28" height="40" rx="10" fill="#f1cdb8"/>
+      <ellipse cx="100" cy="128" rx="47" ry="54" fill="#f7dccb"/>
+      <ellipse cx="81" cy="135" rx="7" ry="10" fill="#2d2440"/>
+      <ellipse cx="119" cy="135" rx="7" ry="10" fill="#2d2440"/>
+      <circle cx="83" cy="131" r="2.6" fill="#fff"/>
+      <circle cx="121" cy="131" r="2.6" fill="#fff"/>
+      <ellipse cx="72" cy="153" rx="8" ry="4" fill="#f4a3b4" opacity=".55"/>
+      <ellipse cx="128" cy="153" rx="8" ry="4" fill="#f4a3b4" opacity=".55"/>
+      <path d="M92 160 Q100 167 108 160" stroke="#a5576a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+<header class="page">
+  <div class="kicker">鈴の約束 · 第1話 はじめまして</div>
+  <h1>Раскадровка: меню, интерфейс и эпизод 1<small>Обещание колокольчика · визуальная новелла по Minna no Nihongo I</small></h1>
+  <p>Тринадцать кадров в порядке, в котором их увидит игрок: от главного меню до итогов первого эпизода.
+     Рисунки условные: персонажи и фоны здесь — заглушки, чтобы показать композицию и интерфейс. Жёлтые цифры на экранах
+     объясняются под каждым кадром.</p>
+  <nav class="toc" aria-label="Кадры">
+    <a href="#menu">Меню</a><a href="#hero">Герой</a><a href="#prologue">Пролог</a><a href="#dialog">Диалог</a>
+    <a href="#translate">Перевод</a><a href="#choice">Выбор</a><a href="#mistake">Ошибка</a><a href="#word">Новое слово</a>
+    <a href="#kenta">Кэнта</a><a href="#letter">Письмо</a><a href="#result">Итоги</a><a href="#map">Карта</a><a href="#settings">Настройки</a>
+  </nav>
+</header>
+
+<!-- 01 МЕНЮ -->
+<section class="board" id="menu">
+  <div class="board-head"><span class="num">01</span><h2>Главное меню</h2><span class="jp">タイトル画面</span></div>
+  <div class="screen">
+    <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="skyM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d0b24"/><stop offset=".7" stop-color="#2b2156"/><stop offset="1" stop-color="#4a2d5e"/></linearGradient>
+        <radialGradient id="moonG"><stop offset="0" stop-color="#fff6e0"/><stop offset=".6" stop-color="#fff6e0" stop-opacity=".25"/><stop offset="1" stop-color="#fff6e0" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#skyM)"/>
+      <circle cx="1180" cy="210" r="210" fill="url(#moonG)"/>
+      <circle cx="1180" cy="210" r="78" fill="#fdf1d4"/>
+      <path d="M0 760 Q400 690 800 740 T1600 720 V900 H0Z" fill="#1a1433"/>
+      <!-- тории -->
+      <g fill="#b8344a">
+        <rect x="1020" y="470" width="420" height="26" rx="6"/>
+        <rect x="1045" y="515" width="370" height="18"/>
+        <rect x="1080" y="490" width="30" height="270"/>
+        <rect x="1350" y="490" width="30" height="270"/>
+      </g>
+      <rect x="1000" y="455" width="460" height="22" rx="8" fill="#2a1830"/>
+      <!-- сакура -->
+      <path d="M760 900 C770 760 740 650 690 560 M720 620 C640 590 600 540 580 500 M730 700 C820 660 880 610 900 560" stroke="#2a1830" stroke-width="22" fill="none" stroke-linecap="round"/>
+      <g fill="#f3a9c0" opacity=".9">
+        <circle cx="690" cy="520" r="90"/><circle cx="590" cy="480" r="70"/><circle cx="800" cy="500" r="80"/>
+        <circle cx="900" cy="540" r="70"/><circle cx="640" cy="580" r="60"/><circle cx="760" cy="440" r="70"/>
+      </g>
+      <g fill="#ffd3e0" opacity=".7"><circle cx="720" cy="470" r="40"/><circle cx="850" cy="520" r="35"/><circle cx="610" cy="520" r="30"/></g>
+    </svg>
+    <span class="petal" style="left:44%;animation-duration:9s"></span>
+    <span class="petal" style="left:58%;animation-duration:12s;animation-delay:-4s"></span>
+    <span class="petal" style="left:70%;animation-duration:10s;animation-delay:-7s"></span>
+    <span class="petal" style="left:86%;animation-duration:13s;animation-delay:-2s"></span>
+    <div class="menu-title">
+      <div class="jp">鈴の約束</div>
+      <div class="ru">Обещание колокольчика</div>
+    </div>
+    <div class="menu-list">
+      <div class="cur">はじめから <small>Новая игра</small></div>
+      <div>つづきから <small>Продолжить · эпизод 1</small></div>
+      <div>ことばノート <small>Тетрадь слов · 0</small></div>
+      <div>はなの てがみ <small>Письмо Ханы</small></div>
+      <div>せってい <small>Настройки</small></div>
+    </div>
+    <svg class="swing" viewBox="0 0 60 110" style="position:absolute;left:1.6%;top:11%;width:4%;z-index:3" aria-hidden="true">
+      <path d="M30 0 V40" stroke="#c8323c" stroke-width="3"/>
+      <path d="M12 82 Q12 42 30 42 Q48 42 48 82 Z" fill="#e8c56c"/>
+      <rect x="8" y="80" width="44" height="6" rx="3" fill="#d1ab4f"/><circle cx="30" cy="94" r="6" fill="#d1ab4f"/>
+    </svg>
+    <div class="menu-foot">Для изучающих японский · уровень 0 → N4</div>
+    <span class="callout" style="left:3.6%;top:33%"><span class="pin">1</span></span>
+    <span class="callout" style="left:5%;top:50%"><span class="pin">2</span></span>
+    <span class="callout" style="left:62%;top:58%"><span class="pin">3</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Колокольчик</b> покачивается и тихо звенит при наведении на пункты меню. Это главный символ игры, его звук закрывает каждую сцену.</span></li>
+    <li><span class="pin">2</span><span><b>Меню на двух языках</b>: японский крупно, русский мелко. С каждым актом русская подпись бледнеет, а после акта 4 исчезает.</span></li>
+    <li><span class="pin">3</span><span><b>Фон меняется по сезону сохранения</b>: весенний храм с сакурой, летний фестиваль, осенние клёны, снег, ночной Токио.</span></li>
+  </ul>
+</section>
+
+<!-- 02 ГЕРОЙ -->
+<section class="board" id="hero">
+  <div class="board-head"><span class="num">02</span><h2>Создание героя</h2><span class="jp">なまえ</span></div>
+  <div class="screen">
+    <div class="layer" style="background:radial-gradient(circle at 70% 20%,#3b2b62,#15132e 70%)"></div>
+    <div class="panel">
+      <div>
+        <h3>あなたの なまえは？</h3>
+        <div class="field"><label for="name-ru">Имя по-русски</label><div class="input" id="name-ru">Анна</div></div>
+        <div class="field"><label>Так его напишут японцы</label><div class="kana">アンナ</div></div>
+        <div class="kana-split">
+          <div><b>ア</b><small>а</small></div><div><b>ン</b><small>н</small></div><div><b>ナ</b><small>на</small></div>
+        </div>
+      </div>
+      <div>
+        <div class="field"><label>Как к тебе обращаться в русском тексте</label>
+          <div class="seg"><span class="on">она · прочитала</span><span>он · прочитал</span></div>
+        </div>
+        <div class="field"><label>Знаешь кану?</label>
+          <div class="seg"><span class="on">да, хирагану и катакану</span><span>нет, нужна ромадзи</span></div>
+        </div>
+        <div class="field"><label>Режим</label>
+          <div class="seg"><span class="on">сам(а)</span><span>урок с учителем</span></div>
+        </div>
+        <div style="margin-top:1.4em"><span class="btn">はじめましょう →</span></div>
+      </div>
+    </div>
+    <span class="callout" style="left:13%;top:43%"><span class="pin">1</span></span>
+    <span class="callout" style="left:55%;top:52%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Имя сразу переводится в катакану</b> и разбирается по знакам. Это первое знакомство с катаканой; правку можно внести вручную (Миша → ミーシャ, Женя → ジェーニャ).</span></li>
+    <li><span class="pin">2</span><span><b>«Нет, нужна ромадзи»</b> включает латинскую транскрипцию над словами в первом акте и подсовывает мини-уроки каны между сценами. <b>«Урок с учителем»</b> — режим для проектора: крупный шрифт, без таймеров, ответы выбирает класс.</span></li>
+  </ul>
+</section>
+
+<!-- 03 ПРОЛОГ -->
+<section class="board" id="prologue">
+  <div class="board-head"><span class="num">03</span><h2>Пролог: колокольчик и письмо</h2><span class="jp">プロローグ</span></div>
+  <div class="screen">
+    <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs><radialGradient id="lamp" cx=".3" cy=".25" r=".9"><stop offset="0" stop-color="#d9b07a"/><stop offset=".5" stop-color="#7b5638"/><stop offset="1" stop-color="#2e1f17"/></radialGradient></defs>
+      <rect width="1600" height="900" fill="url(#lamp)"/>
+      <rect x="0" y="640" width="1600" height="260" fill="#4a3022"/>
+      <rect x="0" y="630" width="1600" height="18" fill="#5e3e2b"/>
+      <!-- коробка и колокольчик -->
+      <rect x="1060" y="560" width="300" height="90" rx="10" fill="#8a7a60"/>
+      <rect x="1050" y="545" width="320" height="26" rx="8" fill="#a79572"/>
+      <path d="M1180 600 Q1180 560 1205 560 Q1230 560 1230 600 Z" fill="#e8c56c"/>
+      <path d="M1205 520 V560" stroke="#c8323c" stroke-width="5"/>
+      <!-- полфото -->
+      <rect x="1280" y="585" width="110" height="80" fill="#d9cdb4" transform="rotate(8 1335 625)"/>
+      <rect x="1290" y="595" width="70" height="60" fill="#8f8572" transform="rotate(8 1335 625)"/>
+    </svg>
+    <div class="sprite" style="left:8%"><svg viewBox="0 0 200 320" aria-label="Бабушка Вера">
+      <path d="M50 120 Q50 60 100 60 Q150 60 150 120 Q160 160 140 190 L60 190 Q40 160 50 120Z" fill="#d6d1cc"/>
+      <path d="M20 320 C20 245 55 212 100 212 C145 212 180 245 180 320Z" fill="#7a4e5c"/>
+      <path d="M70 212 Q100 250 130 212" fill="#e9ddd0"/>
+      <use href="#face"/>
+      <path d="M55 110 Q70 75 100 74 Q130 75 145 110 Q125 92 100 95 Q75 92 55 110Z" fill="#c8c2bc"/>
+      <circle cx="81" cy="135" r="15" fill="none" stroke="#8a6a50" stroke-width="2.5"/><circle cx="119" cy="135" r="15" fill="none" stroke="#8a6a50" stroke-width="2.5"/><path d="M96 135 H104" stroke="#8a6a50" stroke-width="2.5"/>
+    </svg></div>
+    <div class="layer" style="background:linear-gradient(180deg,rgba(60,40,20,.15),rgba(40,25,15,.35));mix-blend-mode:multiply;z-index:3"></div>
+    <div class="letter" style="left:40%;top:6%;width:30%;height:56%;transform:rotate(-2deg);z-index:4">
+      <p><span class="known">ベラ</span><span class="blur">さんへ。</span></p>
+      <p class="blur">お元気ですか。わたしは元気です。</p>
+      <p class="blur">さくらが さきました。</p>
+    </div>
+    <div class="dialog" style="left:30%;min-height:24%">
+      <div class="nametag gold">Вера</div>
+      <div>
+        <div class="narr" style="font-style:normal">Ты знаешь кану. Прочитай первое слово.</div>
+        <div style="display:flex;gap:.6em;margin-top:.6em;font-family:var(--f-ru);font-size:.9em">
+          <span class="choice sel" style="display:block;padding:.3em .9em">Вера</span>
+          <span class="choice" style="display:block;padding:.3em .9em">Бэла</span>
+          <span class="choice" style="display:block;padding:.3em .9em">Пэра</span>
+        </div>
+      </div>
+      <div class="ctrls"><span>音</span><span>履歴</span></div>
+    </div>
+    <span class="callout" style="left:41%;top:12%"><span class="pin">1</span></span>
+    <span class="callout" style="left:76%;top:58%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Письмо почти целиком размыто.</b> Читаемы только слова, которые игрок уже знает. Первое — <b>ベラ</b>: «в японском нет звука „в“, Хана звала меня Бэра».</span></li>
+    <li><span class="pin">2</span><span><b>Предметы из коробки</b> — колокольчик, полфотографии, письмо — потом лежат в инвентаре и открываются из верхней панели.</span></li>
+    <li><span class="pin"> </span><span>Пролог идёт по-русски, в сепии и с зерном, как воспоминание. Японский начинается только в самолёте.</span></li>
+  </ul>
+</section>
+
+<!-- 04 ДИАЛОГ -->
+<section class="board" id="dialog">
+  <div class="board-head"><span class="num">04</span><h2>Основной экран диалога</h2><span class="jp">会話</span></div>
+  <div class="screen">
+    <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs><linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a7a"/><stop offset=".6" stop-color="#d98b8b"/><stop offset="1" stop-color="#f2c08f"/></linearGradient></defs>
+      <rect width="1600" height="900" fill="#2b2a44"/>
+      <rect x="0" y="40" width="1600" height="520" fill="url(#dusk)"/>
+      <g stroke="#1f1e33" stroke-width="18"><path d="M0 40 H1600 M0 560 H1600"/><path d="M320 40 V560 M640 40 V560 M960 40 V560 M1280 40 V560"/></g>
+      <path d="M1040 230 l220 -30 l30 -10 l-20 22 l-90 20 l-40 60 l-20 0 l20 -55 l-80 10 l-20 25 h-12 l8 -30 z" fill="#1f1e33" opacity=".8"/>
+      <rect x="0" y="560" width="1600" height="340" fill="#cfc8d8"/>
+      <g fill="#5d5873" opacity=".55">
+        <ellipse cx="200" cy="600" rx="50" ry="70"/><ellipse cx="300" cy="610" rx="45" ry="65"/><ellipse cx="1300" cy="600" rx="50" ry="70"/><ellipse cx="1420" cy="610" rx="45" ry="68"/>
+      </g>
+    </svg>
+    <div class="hud">
+      <div class="ep-tag"><i>第1話</i> はじめまして <span style="color:var(--muted);font-family:var(--f-ru)">· аэропорт</span></div>
+      <div class="hud-btns"><span>帳</span><span class="lit">手</span><span>鈴</span><span>☰</span></div>
+    </div>
+    <div class="sprite" style="left:50%;transform:translateX(-50%)"><svg viewBox="0 0 200 320" aria-label="Сакура">
+      <path d="M48 120 Q44 60 100 58 Q156 60 152 120 L160 200 Q100 215 40 200Z" fill="#6b3a3a"/>
+      <path d="M150 105 Q190 120 178 205 Q170 230 158 240 Q170 190 150 150Z" fill="#6b3a3a"/>
+      <path d="M20 320 C20 245 55 212 100 212 C145 212 180 245 180 320Z" fill="#2c3563"/>
+      <path d="M58 222 L100 270 L142 222 L130 215 L100 245 L70 215Z" fill="#f4f1ea"/>
+      <path d="M92 262 L100 290 L108 262 Z" fill="#d6455d"/>
+      <use href="#face"/>
+      <path d="M52 115 Q55 70 100 70 Q145 70 148 115 Q138 98 126 104 Q120 86 106 100 Q96 84 84 100 Q72 88 64 108 Q58 100 52 115Z" fill="#7a4343"/>
+      <g transform="translate(140 90)"><circle r="9" fill="#f3a9c0"/><circle r="3.5" fill="#fff3c4"/></g>
+      <rect x="20" y="236" width="70" height="56" rx="4" fill="#fff8ee" transform="rotate(-8 55 264)"/>
+      <text x="55" y="270" font-size="15" text-anchor="middle" fill="#d6455d" font-family="Zen Maru Gothic" transform="rotate(-8 55 264)">ようこそ</text>
+    </svg></div>
+    <div class="dialog">
+      <div class="nametag">さくら</div>
+      <div>
+        <div class="line-jp"><span class="new">はじめまして</span>。たなか さくら です。</div>
+      </div>
+      <div class="ctrls"><span class="next">▼</span><span>音</span><span>訳</span><span class="on">ふりがな</span><span>履歴</span><span>自動</span></div>
+    </div>
+    <span class="callout" style="left:3%;top:13%"><span class="pin">1</span></span>
+    <span class="callout" style="left:80%;top:5%"><span class="pin">2</span></span>
+    <span class="callout" style="left:22%;top:74%"><span class="pin">3</span></span>
+    <span class="callout" style="left:65%;top:82%"><span class="pin">4</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Эпизод и место</b>. Нажатие показывает цель сцены и список слов урока.</span></li>
+    <li><span class="pin">2</span><span><b>Верхняя панель</b>: 帳 тетрадь слов, 手 письмо Ханы (светится, когда в нём что-то открылось), 鈴 инвентарь, ☰ меню и сохранение.</span></li>
+    <li><span class="pin">3</span><span><b>Новые слова подчёркнуты точками.</b> Нажатие на любое слово открывает карточку: чтение, перевод, озвучка, кнопка «в тетрадь».</span></li>
+    <li><span class="pin">4</span><span><b>Кнопки реплики</b>: 音 озвучка, 訳 перевод, ふりがな фуригана над кандзи, 履歴 история диалога, 自動 автопрокрутка. Дальше — нажатие на окно, пробел или Enter.</span></li>
+  </ul>
+</section>
+
+<!-- 05 ПЕРЕВОД -->
+<section class="board" id="translate">
+  <div class="board-head"><span class="num">05</span><h2>Перевод по нажатию</h2><span class="jp">訳</span></div>
+  <div class="screen">
+    <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="1600" height="900" fill="#2b2a44"/>
+      <rect x="0" y="40" width="1600" height="520" fill="url(#dusk)"/>
+      <g stroke="#1f1e33" stroke-width="18"><path d="M0 40 H1600 M0 560 H1600"/><path d="M320 40 V560 M640 40 V560 M960 40 V560 M1280 40 V560"/></g>
+      <rect x="0" y="560" width="1600" height="340" fill="#cfc8d8"/>
+    </svg>
+    <div class="hud">
+      <div class="ep-tag"><i>第1話</i> はじめまして</div>
+      <div class="hud-btns"><span>帳</span><span>手</span><span>鈴</span><span>☰</span></div>
+    </div>
+    <div class="sprite" style="left:50%;transform:translateX(-50%)"><svg viewBox="0 0 200 320" aria-label="Сакура">
+      <path d="M48 120 Q44 60 100 58 Q156 60 152 120 L160 200 Q100 215 40 200Z" fill="#6b3a3a"/>
+      <path d="M150 105 Q190 120 178 205 Q170 230 158 240 Q170 190 150 150Z" fill="#6b3a3a"/>
+      <path d="M20 320 C20 245 55 212 100 212 C145 212 180 245 180 320Z" fill="#2c3563"/>
+      <path d="M58 222 L100 270 L142 222 L130 215 L100 245 L70 215Z" fill="#f4f1ea"/>
+      <path d="M92 262 L100 290 L108 262 Z" fill="#d6455d"/>
+      <use href="#face"/>
+      <path d="M52 115 Q55 70 100 70 Q145 70 148 115 Q138 98 126 104 Q120 86 106 100 Q96 84 84 100 Q72 88 64 108 Q58 100 52 115Z" fill="#7a4343"/>
+      <g transform="translate(140 90)"><circle r="9" fill="#f3a9c0"/><circle r="3.5" fill="#fff3c4"/></g>
+    </svg></div>
+    <div class="dialog">
+      <div class="nametag">さくら</div>
+      <div>
+        <div class="line-jp">わたしは さくらざか <span class="new">こうこう</span><span class="new">の</span> <span class="new">がくせい</span> です。</div>
+        <div class="line-ru">Я ученица школы Сакурадзака.</div>
+      </div>
+      <div class="ctrls"><span class="next">▼</span><span>音</span><span class="on">訳</span><span class="on">ふりがな</span><span>履歴</span><span>自動</span></div>
+    </div>
+    <div class="toast" style="left:44%;top:30%;width:34%">
+      <div class="t-kicker">грамматика · урок 1</div>
+      <div class="t-jp">N₁ の N₂</div>
+      <div class="t-ru">«N₂, который относится к N₁». Как наш родительный падеж: こうこうの がくせい — ученица школы.</div>
+    </div>
+    <span class="callout" style="left:44%;top:30%"><span class="pin">1</span></span>
+    <span class="callout" style="left:6%;top:89%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Нажатие на частицу</b> (の, は, も, か) открывает грамматическую подсказку, а не словарную карточку. Подсказки собираются в тетради на вкладке «Грамматика».</span></li>
+    <li><span class="pin">2</span><span><b>Перевод — по кнопке 訳</b> и сразу скрывается на следующей реплике. В настройках можно включить «всегда», но тогда за эпизод даётся не больше двух звёзд.</span></li>
+  </ul>
+</section>
+
+<!-- 06 ВЫБОР -->
+<section class="board" id="choice">
+  <div class="board-head"><span class="num">06</span><h2>Выбор ответа</h2><span class="jp">せんたく</span></div>
+  <div class="screen">
+    <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="1600" height="900" fill="#2b2a44"/>
+      <rect x="0" y="40" width="1600" height="520" fill="url(#dusk)"/>
+      <g stroke="#1f1e33" stroke-width="18"><path d="M0 40 H1600 M0 560 H1600"/><path d="M320 40 V560 M640 40 V560 M960 40 V560 M1280 40 V560"/></g>
+      <rect x="0" y="560" width="1600" height="340" fill="#cfc8d8"/>
+    </svg>
+    <div class="sprite dim" style="left:50%;transform:translateX(-50%)"><svg viewBox="0 0 200 320" aria-label="Сакура">
+      <path d="M48 120 Q44 60 100 58 Q156 60 152 120 L160 200 Q100 215 40 200Z" fill="#6b3a3a"/>
+      <path d="M20 320 C20 245 55 212 100 212 C145 212 180 245 180 320Z" fill="#2c3563"/>
+      <path d="M58 222 L100 270 L142 222 L130 215 L100 245 L70 215Z" fill="#f4f1ea"/>
+      <use href="#face"/>
+      <path d="M52 115 Q55 70 100 70 Q145 70 148 115 Q138 98 126 104 Q120 86 106 100 Q96 84 84 100 Q72 88 64 108 Q58 100 52 115Z" fill="#7a4343"/>
+    </svg></div>
+    <div class="choices">
+      <div class="choice sel"><span class="k">1</span><span class="jp">はじめまして。アンナ です。ロシアから きました。</span><span class="ru">Приятно познакомиться. Я Анна. Я из России.</span></div>
+      <div class="choice"><span class="k">2</span><span class="jp">おはようございます。アンナ です。</span><span class="ru">Доброе утро. Я Анна.</span></div>
+      <div class="choice"><span class="k">3</span><span class="jp">さようなら。</span><span class="ru">До свидания.</span></div>
+      <div class="timer-hint">Перевод вариантов скрыт · нажми 訳, чтобы открыть</div>
+    </div>
+    <div class="dialog" style="min-height:20%">
+      <div class="nametag">さくら</div>
+      <div><div class="line-jp" style="font-size:1.25em">どうぞ よろしく。</div></div>
+      <div class="ctrls"><span>音</span><span>訳</span><span>履歴</span></div>
+    </div>
+    <span class="callout" style="left:18%;top:14%"><span class="pin">1</span></span>
+    <span class="callout" style="left:82%;top:58%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Варианты ответа — всегда на японском</b>, выбор мышью, пальцем или клавишами 1–3. Выбранная фраза озвучивается и произносится героем.</span></li>
+    <li><span class="pin">2</span><span><b>Русская строка под вариантом</b> на этом кадре показана для раскадровки; в игре она по умолчанию скрыта. Без таймера: новелла не наказывает за медленное чтение.</span></li>
+  </ul>
+</section>
+
+<!-- 07 ОШИБКА -->
+<section class="board" id="mistake">
+  <div class="board-head"><span class="num">07</span><h2>Неправильный ответ</h2><span class="jp">まちがい</span></div>
+  <div class="screen">
+    <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="1600" height="900" fill="#2b2a44"/>
+      <rect x="0" y="40" width="1600" height="520" fill="url(#dusk)"/>
+      <g stroke="#1f1e33" stroke-width="18"><path d="M0 40 H1600 M0 560 H1600"/><path d="M320 40 V560 M640 40 V560 M960 40 V560 M1280 40 V560"/></g>
+      <rect x="0" y="560" width="1600" height="340" fill="#cfc8d8"/>
+    </svg>
+    <div class="sprite" style="left:50%;transform:translateX(-50%) rotate(-3deg)"><svg viewBox="0 0 200 320" aria-label="Сакура удивлена">
+      <path d="M48 120 Q44 60 100 58 Q156 60 152 120 L160 200 Q100 215 40 200Z" fill="#6b3a3a"/>
+      <path d="M150 105 Q190 120 178 205 Q170 230 158 240 Q170 190 150 150Z" fill="#6b3a3a"/>
+      <path d="M20 320 C20 245 55 212 100 212 C145 212 180 245 180 320Z" fill="#2c3563"/>
+      <path d="M58 222 L100 270 L142 222 L130 215 L100 245 L70 215Z" fill="#f4f1ea"/>
+      <rect x="86" y="170" width="28" height="40" rx="10" fill="#f1cdb8"/>
+      <ellipse cx="100" cy="128" rx="47" ry="54" fill="#f7dccb"/>
+      <circle cx="81" cy="135" r="9" fill="#fff" stroke="#2d2440" stroke-width="3"/><circle cx="119" cy="135" r="9" fill="#fff" stroke="#2d2440" stroke-width="3"/>
+      <circle cx="81" cy="135" r="3" fill="#2d2440"/><circle cx="119" cy="135" r="3" fill="#2d2440"/>
+      <ellipse cx="100" cy="163" rx="6" ry="8" fill="#a5576a"/>
+      <path d="M52 115 Q55 70 100 70 Q145 70 148 115 Q138 98 126 104 Q120 86 106 100 Q96 84 84 100 Q72 88 64 108 Q58 100 52 115Z" fill="#7a4343"/>
+    </svg></div>
+    <div class="react" style="left:62%;top:14%">！？</div>
+    <div class="dialog">
+      <div class="nametag">さくら</div>
+      <div>
+        <div class="line-jp">えっ！ さようなら？！</div>
+        <div class="line-ru" style="color:var(--bell)">Подсказка: さようなら — «до свидания». Рановато! При первой встрече говорят はじめまして.</div>
+      </div>
+      <div class="ctrls"><span class="next">▼</span><span style="margin-left:auto">↺ выбрать снова</span></div>
+    </div>
+    <span class="callout" style="left:66%;top:12%"><span class="pin">1</span></span>
+    <span class="callout" style="left:6%;top:86%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Ошибка — это сценка, а не проигрыш.</b> У каждого неверного варианта своя реакция персонажа, часто смешная. Игроку захочется посмотреть их все.</span></li>
+    <li><span class="pin">2</span><span><b>Подсказка объясняет, почему не подошло</b>, и возвращает к выбору. Ошибка снимает сердечко дружбы за этот ответ и звезду за эпизод, а слово попадает в повторение.</span></li>
+  </ul>
+</section>
+
+<!-- 08 НОВОЕ СЛОВО -->
+<section class="board" id="word">
+  <div class="board-head"><span class="num">08</span><h2>Карточка нового слова</h2><span class="jp">あたらしい ことば</span></div>
+  <div class="screen">
+    <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="1600" height="900" fill="#2b2a44"/>
+      <rect x="0" y="40" width="1600" height="520" fill="url(#dusk)"/>
+      <g stroke="#1f1e33" stroke-width="18"><path d="M0 40 H1600 M0 560 H1600"/><path d="M320 40 V560 M640 40 V560 M960 40 V560 M1280 40 V560"/></g>
+      <rect x="0" y="560" width="1600" height="340" fill="#cfc8d8"/>
+    </svg>
+    <div class="sprite" style="left:22%"><svg viewBox="0 0 200 320" aria-label="Хироси">
+      <path d="M52 112 Q50 66 100 64 Q150 66 148 112 Q140 92 100 92 Q60 92 52 112Z" fill="#26222e"/>
+      <path d="M20 320 C20 245 55 212 100 212 C145 212 180 245 180 320Z" fill="#3c4250"/>
+      <path d="M78 212 L100 250 L122 212Z" fill="#f2f2f2"/><path d="M95 222 L100 290 L105 222Z" fill="#3a5f9e"/>
+      <use href="#face"/>
+      <path d="M52 112 Q60 80 100 78 Q140 80 148 112 Q130 96 100 98 Q70 96 52 112Z" fill="#26222e"/>
+      <rect x="67" y="124" width="28" height="20" rx="5" fill="none" stroke="#2d2440" stroke-width="3"/><rect x="105" y="124" width="28" height="20" rx="5" fill="none" stroke="#2d2440" stroke-width="3"/><path d="M95 133 H105" stroke="#2d2440" stroke-width="3"/>
+    </svg></div>
+    <div class="toast" style="left:52%;top:12%;width:40%">
+      <div class="t-kicker">новое слово · урок 1</div>
+      <div class="t-jp">ぎんこういん</div>
+      <div class="t-ru"><b>гинко:ин</b> · банковский служащий</div>
+      <div class="t-ex">ちちは ぎんこういん です。<br><span style="font-family:var(--f-ru)">Мой папа работает в банке.</span></div>
+      <div style="display:flex;gap:.5em;margin-top:.6em;font-size:.8em">
+        <span class="btn" style="font-size:.9em">音 слушать</span><span class="btn ghost" style="color:var(--paper-ink);border-color:#cdbfa6;font-size:.9em">＋ в тетрадь</span>
+      </div>
+    </div>
+    <div class="dialog">
+      <div class="nametag gray">ひろし</div>
+      <div><div class="line-jp">はじめまして。たなか ひろし です。<span class="new">ぎんこういん</span> です。</div></div>
+      <div class="ctrls"><span class="next">▼</span><span>音</span><span>訳</span><span>履歴</span></div>
+    </div>
+    <span class="callout" style="left:53%;top:22%"><span class="pin">1</span></span>
+    <span class="callout" style="left:72%;top:58%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Чтение по Поливанову</b> (гинко:ин), как в おちることば, плюс озвучка и пример из этой же сцены.</span></li>
+    <li><span class="pin">2</span><span><b>Слово записывается в тетрадь автоматически</b> при первой встрече; кнопка нужна для бонусных слов. Из тетради слова уходят в повторение перед следующим эпизодом.</span></li>
+  </ul>
+</section>
+
+<!-- 09 КЭНТА -->
+<section class="board" id="kenta">
+  <div class="board-head"><span class="num">09</span><h2>Непонятная речь: Кэнта</h2><span class="jp">？？？</span></div>
+  <div class="screen">
+    <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="1600" height="900" fill="#7a5a3e"/>
+      <rect x="0" y="0" width="1600" height="620" fill="#c9a77d"/>
+      <g fill="#a98559"><rect x="80" y="0" width="30" height="620"/><rect x="1490" y="0" width="30" height="620"/></g>
+      <rect x="380" y="70" width="840" height="550" fill="#efe3c8" stroke="#8a6a48" stroke-width="16"/>
+      <g stroke="#b79c76" stroke-width="5"><path d="M380 250 H1220 M380 430 H1220 M660 70 V620 M940 70 V620"/></g>
+      <rect x="0" y="620" width="1600" height="40" fill="#5e432d"/>
+      <g fill="#3b2a1e"><ellipse cx="300" cy="760" rx="60" ry="18"/><ellipse cx="420" cy="770" rx="60" ry="18"/><ellipse cx="1240" cy="760" rx="60" ry="18"/></g>
+    </svg>
+    <div class="sprite" style="left:58%;height:66%"><svg viewBox="0 0 200 320" aria-label="Кэнта">
+      <path d="M50 118 Q48 66 100 62 Q152 66 150 118 Z" fill="#2b2230"/>
+      <path d="M20 320 C20 245 55 212 100 212 C145 212 180 245 180 320Z" fill="#7cc4a0"/>
+      <g fill="#4f9a76"><path d="M60 250 l12 -16 l12 16Z"/><path d="M100 245 l12 -16 l12 16Z"/><path d="M135 255 l12 -16 l12 16Z"/></g>
+      <use href="#face"/>
+      <path d="M50 112 Q56 72 100 72 Q144 72 150 112 L140 96 L132 108 L122 92 L112 106 L100 88 L90 106 L78 92 L70 108 L60 96Z" fill="#2b2230"/>
+    </svg></div>
+    <div class="sprite dim" style="left:12%"><svg viewBox="0 0 200 320" aria-label="Юмико">
+      <path d="M46 125 Q40 62 100 60 Q160 62 154 125 Q160 175 140 190 L60 190 Q40 175 46 125Z" fill="#4a2f2b"/>
+      <path d="M20 320 C20 245 55 212 100 212 C145 212 180 245 180 320Z" fill="#e6a77a"/>
+      <rect x="60" y="250" width="80" height="70" fill="#f6efe2"/>
+      <use href="#face"/>
+      <path d="M50 118 Q60 74 100 72 Q140 74 150 118 Q120 90 100 100 Q80 92 50 118Z" fill="#4a2f2b"/>
+    </svg></div>
+    <div class="dialog">
+      <div class="nametag gray">けんた</div>
+      <div>
+        <div class="line-jp">すげー！ くま、いる？ くま！</div>
+        <div class="line-ru hidden">？？？ · Кэнта говорит слишком быстро и не так, как в учебнике</div>
+      </div>
+      <div class="ctrls"><span class="next">▼</span><span>音</span><span style="opacity:.4">訳 🔒</span><span>履歴</span></div>
+    </div>
+    <span class="callout" style="left:22%;top:84%"><span class="pin">1</span></span>
+    <span class="callout" style="left:60%;top:90%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Разговорная речь Кэнты и Рику не переводится</b> до эпизода 20, где проходят разговорный стиль. Эти реплики собираются в тетради на странице «Шифр Кэнты».</span></li>
+    <li><span class="pin">2</span><span><b>Кнопка 訳 закрыта замком.</b> Смысл угадывается по жестам и контексту: здесь Кэнта рычит и показывает руками что-то большое. В эпизоде 20 все записанные фразы переводятся разом.</span></li>
+  </ul>
+</section>
+
+<!-- 10 ПИСЬМО -->
+<section class="board" id="letter">
+  <div class="board-head"><span class="num">10</span><h2>Письмо Ханы</h2><span class="jp">はなの てがみ</span></div>
+  <div class="screen">
+    <svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="1600" height="900" fill="#171431"/>
+      <rect x="0" y="560" width="1600" height="340" fill="#6c7448"/>
+      <g stroke="#565c38" stroke-width="5"><path d="M0 680 H1600 M0 800 H1600 M400 560 V900 M1000 560 V900"/></g>
+      <rect x="120" y="90" width="360" height="380" fill="#24305a" stroke="#d9cbb0" stroke-width="14"/>
+      <circle cx="380" cy="190" r="45" fill="#fdf1d4"/>
+      <path d="M120 420 L240 300 L330 380 L480 260 V470 H120Z" fill="#141a33"/>
+    </svg>
+    <div class="layer" style="background:rgba(10,8,25,.45);z-index:2"></div>
+    <div class="letter">
+      <p><span class="known">ベラ</span>さん へ。</p>
+      <p><span class="blur">お元気ですか。</span><span class="known">わたし</span><span class="blur">は 元気</span><span class="known">です</span>。</p>
+      <p class="blur">さくらざかは いま、はるです。</p>
+      <p class="blur">じんじゃの さくらが きれいです。</p>
+      <p class="blur">この すずを もっていてください。</p>
+      <p class="blur" style="text-align:right">はな より</p>
+    </div>
+    <div class="letter-parts">
+      <div class="part"><i></i>Часть 1 · 3 слова</div>
+      <div><i></i>Часть 2 · акт 2</div>
+      <div><i></i>Часть 3 · акт 3</div>
+      <div><i></i>Часть 4 · акт 4</div>
+      <div><i></i>Часть 5 · акт 5</div>
+    </div>
+    <span class="callout" style="left:30%;top:11%"><span class="pin">1</span></span>
+    <span class="callout" style="left:80%;top:20%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Знакомые слова подсвечиваются золотом</b> и становятся резкими, остальное остаётся размытым. Каждое выученное слово, которое есть в письме, проявляется в нём сразу после эпизода.</span></li>
+    <li><span class="pin">2</span><span><b>Прогресс по частям письма.</b> Часть открывается целиком в конце своего акта: так игрок видит, ради чего учит грамматику.</span></li>
+  </ul>
+</section>
+
+<!-- 11 ИТОГИ -->
+<section class="board" id="result">
+  <div class="board-head"><span class="num">11</span><h2>Итоги эпизода</h2><span class="jp">けっか</span></div>
+  <div class="screen">
+    <div class="layer" style="background:radial-gradient(circle at 50% 0%,#3f2c5e,#15132e 75%)"></div>
+    <div class="result">
+      <h3><span>第1話 はじめまして</span><span class="stars">★★☆</span></h3>
+      <div>
+        <h4>Слова · 15 + 5 бонусных</h4>
+        <div class="wordgrid">
+          <span>わたし<small>я</small></span><span>がくせい<small>студент</small></span>
+          <span>せんせい<small>учитель</small></span><span>ぎんこういん<small>банкир</small></span>
+          <span>はい<small>да</small></span><span>いいえ<small>нет</small></span>
+          <span>〜じん<small>национальность</small></span><span>〜さい<small>… лет</small></span>
+          <span>だれ<small>кто</small></span><span style="color:var(--bell)">すず<small>？？？</small></span>
+        </div>
+      </div>
+      <div>
+        <h4>Дружба</h4>
+        <div class="friends">
+          <div>さくら<span class="bar"><i style="width:40%"></i></span></div>
+          <div>ひろし<span class="bar"><i style="width:20%"></i></span></div>
+          <div>ゆみこ<span class="bar"><i style="width:20%"></i></span></div>
+          <div>けんた<span class="bar"><i style="width:10%"></i></span></div>
+        </div>
+        <h4 style="margin-top:1em">Грамматика</h4>
+        <div style="font-size:.85em">は … です · じゃありません · か · も · の</div>
+      </div>
+      <div class="actions"><span class="btn ghost">Повторить слова · 5</span><span class="btn">第2話 へ →</span></div>
+    </div>
+    <span class="callout" style="left:84%;top:13%"><span class="pin">1</span></span>
+    <span class="callout" style="left:62%;top:89%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Звёзды</b>: ★ — эпизод пройден, ★★ — не больше трёх ошибок, ★★★ — без ошибок и без постоянного перевода.</span></li>
+    <li><span class="pin">2</span><span><b>Повторение</b> — пять быстрых вопросов по словам эпизода (механика как в おちることば). Оно же автоматически открывается перед следующим эпизодом.</span></li>
+  </ul>
+</section>
+
+<!-- 12 КАРТА -->
+<section class="board" id="map">
+  <div class="board-head"><span class="num">12</span><h2>Карта глав</h2><span class="jp">もくじ</span></div>
+  <div class="screen">
+    <div class="layer" style="background:linear-gradient(90deg,#3a2140 0%,#2a2a52 25%,#3d2230 50%,#1e2b4a 75%,#120c26 100%)"></div>
+    <div class="hud"><div class="ep-tag"><i>もくじ</i> Глава 1 из 5 · 1 / 25 эпизодов</div></div>
+    <div class="map">
+      <div class="act"><div class="ah" style="color:var(--sakura)">春</div><div class="as">Весна · уроки 1–5</div>
+        <div class="eps"><div class="ep"><b>1 はじめまして</b><small>★★</small></div><div class="ep cur"><b>2 これは なん？</b></div><div class="ep lock"><b>3 まち</b></div><div class="ep lock"><b>4 がっこう</b></div><div class="ep lock"><b>5 じんじゃ</b></div></div></div>
+      <div class="act locked"><div class="ah" style="color:#ffb072">夏</div><div class="as">Мацури · 6–10</div>
+        <div class="eps"><div class="ep lock"><b>6 ･･･</b></div><div class="ep lock"><b>7 ･･･</b></div><div class="ep lock"><b>8 ･･･</b></div><div class="ep lock"><b>9 ･･･</b></div><div class="ep lock"><b>10 ･･･</b></div></div></div>
+      <div class="act locked"><div class="ah" style="color:#ff8a5c">秋</div><div class="as">Момидзи · 11–15</div>
+        <div class="eps"><div class="ep lock"><b>11 ･･･</b></div><div class="ep lock"><b>12 ･･･</b></div><div class="ep lock"><b>13 ･･･</b></div><div class="ep lock"><b>14 ･･･</b></div><div class="ep lock"><b>15 ･･･</b></div></div></div>
+      <div class="act locked"><div class="ah" style="color:#9fc4ff">冬</div><div class="as">Снег · 16–20</div>
+        <div class="eps"><div class="ep lock"><b>16 ･･･</b></div><div class="ep lock"><b>17 ･･･</b></div><div class="ep lock"><b>18 ･･･</b></div><div class="ep lock"><b>19 ･･･</b></div><div class="ep lock"><b>20 ･･･</b></div></div></div>
+      <div class="act locked"><div class="ah" style="color:#ff6fdc">夜</div><div class="as">Токио · 21–25</div>
+        <div class="eps"><div class="ep lock"><b>21 ･･･</b></div><div class="ep lock"><b>22 ･･･</b></div><div class="ep lock"><b>23 ･･･</b></div><div class="ep lock"><b>24 ･･･</b></div><div class="ep lock"><b>25 ･･･</b></div></div></div>
+    </div>
+    <span class="callout" style="left:6%;top:42%"><span class="pin">1</span></span>
+    <span class="callout" style="left:30%;top:22%"><span class="pin">2</span></span>
+  </div>
+  <ul class="notes">
+    <li><span class="pin">1</span><span><b>Названия эпизодов на японском</b> и открываются только после прохождения: название будущего эпизода — спойлер.</span></li>
+    <li><span class="pin">2</span><span><b>Закрытые акты</b> показывают только сезон и номера уроков. Пройденный эпизод можно переиграть ради звёзд и пропущенных реакций.</span></li>
+  </ul>
+</section>
+
+<!-- 13 НАСТРОЙКИ -->
+<section class="board" id="settings">
+  <div class="board-head"><span class="num">13</span><h2>Настройки</h2><span class="jp">せってい</span></div>
+  <div class="screen">
+    <div class="layer" style="background:radial-gradient(circle at 30% 100%,#3a2a5c,#15132e 70%)"></div>
+    <div class="settings">
+      <h3>せってい</h3>
+      <div class="srow"><div class="lbl">Фуригана<small>чтения над кандзи</small></div><div class="seg"><span>всегда</span><span class="on">у новых</span><span>нет</span></div></div>
+      <div class="srow"><div class="lbl">Перевод реплик<small>«всегда» ограничивает до ★★</small></div><div class="seg"><span class="on">по нажатию</span><span>всегда</span></div></div>
+      <div class="srow"><div class="lbl">Транскрипция<small>для тех, кто ещё не знает кану</small></div><div class="seg"><span class="on">нет</span><span>кириллица</span><span>ромадзи</span></div></div>
+      <div class="srow"><div class="lbl">Скорость текста</div><div class="slider"><i style="width:55%"></i></div></div>
+      <div class="srow"><div class="lbl">Озвучка реплик</div><div class="slider"><i style="width:80%"></i></div></div>
+      <div class="srow"><div class="lbl">Музыка</div><div class="slider"><i style="width:45%"></i></div></div>
+      <div class="srow"><div class="lbl">Размер шрифта<small>крупный — для проектора в классе</small></div><div class="seg"><span>Ａ</span><span class="on">Ａ＋</span><span>Ａ＋＋</span></div></div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><span class="pin"> </span><span>Фуригана и транскрипция — разные настройки: фуригана нужна, пока кандзи незнакомы, транскрипция — пока не выучена сама кана.</span></li>
+  </ul>
+</section>
+
+<section class="board">
+  <h2 class="section">Кнопки диалога</h2>
+  <div class="legend">
+    <div><code>▼</code><span>следующая реплика · пробел, Enter, нажатие</span></div>
+    <div><code>音</code><span>озвучить реплику ещё раз</span></div>
+    <div><code>訳</code><span>перевод этой реплики</span></div>
+    <div><code>ふりがな</code><span>чтения над кандзи</span></div>
+    <div><code>履歴</code><span>история: все реплики сцены с переводом</span></div>
+    <div><code>自動</code><span>автопрокрутка</span></div>
+    <div><code>帳</code><span>тетрадь слов и грамматики</span></div>
+    <div><code>手</code><span>письмо Ханы</span></div>
+    <div><code>鈴</code><span>предметы: колокольчик, фото, письмо</span></div>
+    <div><code>1–3</code><span>выбор варианта ответа с клавиатуры</span></div>
+  </div>
+</section>
+
+</div>
